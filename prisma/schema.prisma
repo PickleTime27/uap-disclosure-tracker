@@ -1,0 +1,276 @@
+// prisma/schema.prisma
+// UAP Disclosure Tracker — Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// HEARINGS — Congressional hearings on UAP
+// ============================================
+model Hearing {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?   @db.Text
+  committee     String    // e.g. "Senate Armed Services", "House Oversight"
+  subcommittee  String?
+  chamber       Chamber   // SENATE or HOUSE
+  date          DateTime
+  status        HearingStatus @default(UPCOMING)
+  isClassified  Boolean   @default(false)
+  videoUrl      String?   // C-SPAN or committee video link
+  transcriptUrl String?
+  summary       String?   @db.Text  // AI-generated summary
+  keyTakeaways  String[]  // Array of key points
+  witnesses     Witness[]
+  tags          String[]
+  sourceUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@index([committee])
+}
+
+model Witness {
+  id          String  @id @default(cuid())
+  name        String
+  title       String? // e.g. "AARO Director", "USAF Veteran"
+  organization String?
+  bio         String? @db.Text
+  hearingId   String
+  hearing     Hearing @relation(fields: [hearingId], references: [id])
+  testimony   String? @db.Text
+  keyQuotes   String[]
+
+  @@index([hearingId])
+}
+
+// ============================================
+// DOCUMENTS — Declassified files, FOIA releases
+// ============================================
+model Document {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?   @db.Text
+  source        DocumentSource
+  sourceAgency  String?   // e.g. "DoD", "CIA", "NSA", "FAA", "State Dept"
+  documentType  DocumentType
+  datePublished DateTime?
+  dateOriginal  DateTime? // Original document date (could be decades old)
+  fileUrl       String?   // Link to actual document
+  pageCount     Int?
+  classification String?  // e.g. "UNCLASSIFIED", "FORMERLY SECRET"
+  summary       String?   @db.Text  // AI-generated summary
+  keyFindings   String[]
+  tags          String[]
+  naraRecordId  String?   // NARA catalog ID if applicable
+  foiaRequestId String?   // Associated FOIA request
+  sourceUrl     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([source])
+  @@index([datePublished])
+  @@index([sourceAgency])
+  @@index([documentType])
+}
+
+// ============================================
+// LEGISLATION — Bills, amendments, NDAA provisions
+// ============================================
+model Legislation {
+  id            String    @id @default(cuid())
+  title         String
+  billNumber    String?   // e.g. "H.R. 2365", "S. 1234"
+  congress      Int?      // e.g. 118, 119
+  session       Int?
+  chamber       Chamber
+  status        LegislationStatus
+  sponsor       String?
+  cosponsors    String[]
+  description   String?   @db.Text
+  summary       String?   @db.Text  // AI-generated summary
+  uapProvisions String?   @db.Text  // Specific UAP-related sections
+  dateIntroduced DateTime?
+  dateLastAction DateTime?
+  lastAction    String?
+  congressGovUrl String?
+  tags          String[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([congress])
+  @@index([dateIntroduced])
+}
+
+// ============================================
+// TIMELINE EVENTS — Major disclosure milestones
+// ============================================
+model TimelineEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  date        DateTime
+  category    EventCategory
+  importance  Importance @default(MEDIUM)
+  sourceUrl   String?
+  imageUrl    String?
+  tags        String[]
+  relatedIds  String[]  // IDs of related hearings, documents, legislation
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([date])
+  @@index([category])
+  @@index([importance])
+}
+
+// ============================================
+// KEY PLAYERS — People involved in disclosure
+// ============================================
+model KeyPlayer {
+  id          String    @id @default(cuid())
+  name        String
+  role        String    // Current role
+  organization String?
+  category    PlayerCategory
+  bio         String?   @db.Text
+  photoUrl    String?
+  stance      String?   // Their known position on disclosure
+  keyActions  String[]  // Notable things they've done
+  socialLinks Json?     // { twitter, website, etc. }
+  isActive    Boolean   @default(true)
+  tags        String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([category])
+}
+
+// ============================================
+// ALERTS — Breaking news notifications
+// ============================================
+model Alert {
+  id          String    @id @default(cuid())
+  title       String
+  body        String    @db.Text
+  category    EventCategory
+  importance  Importance
+  sourceUrl   String?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([importance])
+}
+
+// ============================================
+// SCRAPER LOGS — Track data collection runs
+// ============================================
+model ScraperLog {
+  id          String    @id @default(cuid())
+  source      String    // e.g. "nara", "congress", "aaro"
+  status      String    // "success", "error", "partial"
+  itemsFound  Int       @default(0)
+  itemsNew    Int       @default(0)
+  error       String?   @db.Text
+  duration    Int?      // milliseconds
+  ranAt       DateTime  @default(now())
+
+  @@index([source])
+  @@index([ranAt])
+}
+
+// ============================================
+// ENUMS
+// ============================================
+enum Chamber {
+  SENATE
+  HOUSE
+  JOINT
+}
+
+enum HearingStatus {
+  UPCOMING
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentSource {
+  NARA          // National Archives
+  AARO          // All-domain Anomaly Resolution Office
+  FOIA          // Freedom of Information Act request
+  CIA           // CIA Reading Room
+  NSA           // NSA declassified
+  DOD           // Department of Defense
+  FAA           // Federal Aviation Administration
+  NASA          // NASA
+  BLACK_VAULT   // The Black Vault archive
+  CONGRESS      // Congressional reports
+  EXECUTIVE     // Executive orders, presidential directives
+  OTHER
+}
+
+enum DocumentType {
+  REPORT        // Annual reports, assessments
+  MEMO          // Internal memos
+  EMAIL         // Government emails
+  TESTIMONY     // Written testimony
+  PHOTO         // Declassified photos
+  VIDEO         // Declassified video
+  RADAR_DATA    // Sensor/radar data
+  FOIA_RESPONSE // FOIA response letter
+  LEGISLATION   // Bill text
+  EXECUTIVE_ORDER
+  PRESS_RELEASE
+  OTHER
+}
+
+enum LegislationStatus {
+  INTRODUCED
+  IN_COMMITTEE
+  PASSED_HOUSE
+  PASSED_SENATE
+  PASSED_BOTH
+  SIGNED_INTO_LAW
+  VETOED
+  DEAD
+}
+
+enum EventCategory {
+  HEARING
+  DOCUMENT_RELEASE
+  LEGISLATION
+  EXECUTIVE_ACTION
+  WHISTLEBLOWER
+  MEDIA
+  SCIENTIFIC
+  INTERNATIONAL
+}
+
+enum Importance {
+  CRITICAL    // Major disclosure event
+  HIGH        // Significant development
+  MEDIUM      // Notable update
+  LOW         // Minor update
+}
+
+enum PlayerCategory {
+  LEGISLATOR       // Senators, Representatives
+  MILITARY         // Active/retired military
+  INTELLIGENCE     // Intelligence community
+  WHISTLEBLOWER    // Named whistleblowers
+  SCIENTIST        // Researchers, academics
+  JOURNALIST       // UAP journalists
+  GOVERNMENT       // Other government officials
+  ADVOCATE         // Disclosure advocates
+}

@@ -1,0 +1,1 @@
+const fs = require("fs"); fs.writeFileSync("src/app/documents/page.tsx", "export default function DocumentsPage() { return (<div className=\"min-h-screen bg-void-950 text-white p-8\"><h1 className=\"text-3xl font-bold mb-4\">Declassified Documents</h1><p className=\"text-gray-400\">Document library coming soon.</p></div>); }", "utf8"); console.log("Fixed!");

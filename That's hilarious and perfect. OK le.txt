@@ -1,0 +1,30 @@
+That's hilarious and perfect. OK let me build that out — here's what I'm picturing:
+
+- **Wooden fence** along the bottom of the field
+- **Farmhouse** just off the right edge of screen (barely visible or just the porch)
+- **Porch light flicks on** when a cow gets abducted (yellow light splash across the scene)
+- **Farmer silhouette** runs out with a shotgun
+- **Muzzle flash** as he shoots at the sky
+- **Farmer shakes fist** then goes back inside
+- **Porch light turns off** ... until the next cow gets taken
+
+That's going to be amazing. Let me build the upgraded animation script. Since PowerShell has been fighting us, I'll make it a downloadable Node.js script like we did for the other pages.Download that file, put it in your project root folder, then run:
+
+```powershell
+node fix-hero.js
+```
+
+Here's what the upgraded animation includes:
+
+- **Moon** with craters and glow in the upper right
+- **Twinkling stars** that pulse in brightness
+- **UFO** with rotating red lights and dome, follows the cow being abducted
+- **Beam shimmer** with floating particles
+- **Cow shadows** that shrink as they float up
+- **Grass tufts** swaying in the breeze
+- **Wooden fence** across the field
+- **Porch light** flicks on from the right edge when a cow gets taken
+- **Farmer silhouette** runs out with a shotgun, aims up, fires twice (with muzzle flash!), shakes his fist at the sky, then walks back inside
+- **Porch light fades off** as he goes back in
+
+The farmer triggers every time a new cow gets beamed up!

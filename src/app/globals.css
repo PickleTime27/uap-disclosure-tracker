@@ -1,0 +1,131 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Base dark theme */
+body {
+  font-family: var(--font-body);
+  background-color: #030712;
+  color: #e5e7eb;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0f1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #243044;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0891b2;
+}
+
+/* Utility classes */
+@layer components {
+  /* Card with subtle glow */
+  .card {
+    @apply bg-void-800/60 border border-void-600/40 rounded-lg backdrop-blur-sm;
+    @apply transition-all duration-300;
+  }
+  .card:hover {
+    @apply border-signal-700/50 shadow-lg shadow-signal-500/5;
+  }
+
+  /* Status badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium font-mono;
+  }
+  .badge-critical {
+    @apply bg-critical-500/15 text-critical-400 border border-critical-500/30;
+  }
+  .badge-high {
+    @apply bg-alert-500/15 text-alert-400 border border-alert-500/30;
+  }
+  .badge-medium {
+    @apply bg-signal-500/15 text-signal-400 border border-signal-500/30;
+  }
+  .badge-low {
+    @apply bg-void-600/50 text-gray-400 border border-void-600/50;
+  }
+
+  /* Hearing status badges */
+  .badge-upcoming {
+    @apply bg-signal-500/15 text-signal-400 border border-signal-500/30;
+  }
+  .badge-live {
+    @apply bg-critical-500/20 text-critical-400 border border-critical-500/40 animate-pulse-slow;
+  }
+  .badge-completed {
+    @apply bg-verified-500/15 text-verified-400 border border-verified-500/30;
+  }
+
+  /* Radar ping effect for live events */
+  .radar-ping {
+    @apply relative;
+  }
+  .radar-ping::before {
+    content: '';
+    @apply absolute -left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-critical-500;
+    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Grid lines background */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Scanline overlay for that FLIR feel */
+  .scanline-overlay {
+    position: relative;
+    overflow: hidden;
+  }
+  .scanline-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(6, 182, 212, 0.015) 2px,
+      rgba(6, 182, 212, 0.015) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Section header */
+  .section-header {
+    @apply font-display text-xl font-semibold tracking-tight;
+    @apply flex items-center gap-2;
+  }
+  .section-header::before {
+    content: '';
+    @apply w-1 h-5 bg-signal-500 rounded-full;
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: translateY(-50%) scale(2);
+    opacity: 0;
+  }
+}

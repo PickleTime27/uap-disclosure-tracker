@@ -1,0 +1,15 @@
+Ha! The cows are flying right past the UFO instead of stopping. Let me fix that — they need to disappear when they reach the UFO's height instead of going off screen.
+
+Let me make a quick fix script:Download `fix-cows.js`, move it to your project folder, then:
+
+```powershell
+node fix-cows.js
+```
+
+Or if the download doesn't work again, just run this directly in PowerShell:
+
+```powershell
+node -e "const fs=require('fs');let c=fs.readFileSync('src/components/HeroBackground.tsx','utf8');c=c.replace('if (cow.y < -50) {','if (cow.y < ufo.y * H + 20) {');c=c.replace('cow.floatY += 0.5;','cow.floatY += 0.35;');fs.writeFileSync('src/components/HeroBackground.tsx',c,'utf8');console.log('Fixed!')"
+```
+
+This makes the cows disappear when they reach the UFO and slows the float speed a bit for more drama.

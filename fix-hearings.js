@@ -1,0 +1,1 @@
+const fs=require("fs"); const f=fs.readFileSync("src/app/hearings/page.tsx"); fs.writeFileSync("src/app/hearings/page.tsx", f.toString("utf8").replace(/^\uFEFF/,""), "utf8"); console.log("Fixed hearings!");
