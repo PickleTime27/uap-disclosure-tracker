@@ -1,4 +1,6 @@
-'use client';
+const fs = require('fs');
+
+const homePage = `'use client';
 import Navbar from '@/components/layout/Navbar';
 import HeroBackground from '@/components/HeroBackground';
 
@@ -90,4 +92,7 @@ export default function Home() {
       </div>
     </main></>
   );
-}
+}`;
+
+fs.writeFileSync('src/app/page.tsx', homePage, 'utf8');
+console.log('Dashboard upgraded with source badges!');
