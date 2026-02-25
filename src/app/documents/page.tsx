@@ -11,7 +11,7 @@ const docs = [
   { id: '6', title: 'Pentagon Declassified UAP Videos (FLIR1, Gimbal, GoFast)', source: 'DOD', agency: 'Department of Defense', date: 'Apr 2020', classification: 'DECLASSIFIED', summary: 'Three Navy pilot UAP videos officially released. Originally filmed 2004 and 2015.', url: 'https://www.war.gov/News/Releases/Release/Article/2165713/statement-by-the-department-of-defense-on-the-release-of-historical-navy-videos/' },
 ];
 
-const sourceColors = {
+const sourceColors: Record<string, string> = {
   EXECUTIVE: 'bg-red-500/15 text-red-400 border-red-500/30',
   AARO: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
   NARA: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
