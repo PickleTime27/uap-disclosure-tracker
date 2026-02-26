@@ -1,0 +1,352 @@
+const fs = require('fs');
+const path = require('path');
+
+// Ensure directories exist
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+// 1. Create the Videos page
+ensureDir('src/app/videos');
+
+const videosPage = `'use client';
+import { useState, useEffect } from 'react';
+import Navbar from '@/components/layout/Navbar';
+
+interface Video {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  publishedAt: string;
+  channelTitle: string;
+}
+
+const SEARCH_CATEGORIES = [
+  { label: 'ALL', query: 'UAP disclosure hearing official' },
+  { label: 'HEARINGS', query: 'UAP congressional hearing testimony' },
+  { label: 'NEWS', query: 'UAP UFO government disclosure news' },
+  { label: 'PENTAGON', query: 'Pentagon AARO UAP briefing official' },
+  { label: 'WHISTLEBLOWER', query: 'UAP whistleblower David Grusch testimony' },
+];
+
+export default function VideosPage() {
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState('ALL');
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+
+  const fetchVideos = async (category: string) => {
+    setLoading(true);
+    setError(null);
+    const cat = SEARCH_CATEGORIES.find(c => c.label === category);
+    const query = cat ? cat.query : SEARCH_CATEGORIES[0].query;
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+      if (!apiKey) {
+        throw new Error('YouTube API key not configured');
+      }
+      const url = \`https://www.googleapis.com/youtube/v3/search?part=snippet&q=\${encodeURIComponent(query)}&type=video&maxResults=12&order=date&relevanceLanguage=en&key=\${apiKey}\`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || 'YouTube API error');
+      }
+      const data = await res.json();
+      const items: Video[] = (data.items || []).map((item: any) => ({
+        id: item.id?.videoId || '',
+        title: item.snippet?.title || '',
+        description: item.snippet?.description || '',
+        thumbnail: item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.medium?.url || '',
+        publishedAt: item.snippet?.publishedAt || '',
+        channelTitle: item.snippet?.channelTitle || '',
+      }));
+      setVideos(items);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load videos');
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos(activeCategory);
+  }, [activeCategory]);
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const decodeHtml = (html: string) => {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  };
+
+  return (
+    <>
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            UAP Videos & Footage
+          </h1>
+          <p className="text-gray-400">
+            Latest congressional hearings, Pentagon briefings, whistleblower testimony, and UAP news coverage from YouTube.
+          </p>
+        </div>
+
+        {/* Category Filter Buttons */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {SEARCH_CATEGORIES.map((cat) => (
+            <button
+              key={cat.label}
+              onClick={() => { setActiveCategory(cat.label); setPlayingVideo(null); }}
+              className={\`px-4 py-2 rounded-lg text-sm font-semibold transition-all \${
+                activeCategory === cat.label
+                  ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
+              }\`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="inline-block w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-400">Searching YouTube...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 text-center">
+            <p className="text-red-400 font-semibold mb-2">Error Loading Videos</p>
+            <p className="text-red-400/70 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Video Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {videos.map((video) => (
+              <div
+                key={video.id}
+                className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden hover:border-cyan-500/50 transition-all group"
+              >
+                {/* Video Thumbnail or Embed */}
+                <div className="relative aspect-video bg-black">
+                  {playingVideo === video.id ? (
+                    <iframe
+                      src={\`https://www.youtube.com/embed/\${video.id}?autoplay=1\`}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <div
+                      className="relative w-full h-full cursor-pointer"
+                      onClick={() => setPlayingVideo(video.id)}
+                    >
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Play Button Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-all">
+                        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                          <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Video Info */}
+                <div className="p-4">
+                  <a
+                    href={\`https://www.youtube.com/watch?v=\${video.id}\`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white font-semibold text-sm leading-tight hover:text-cyan-400 transition-colors line-clamp-2"
+                  >
+                    {decodeHtml(video.title)}
+                  </a>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs text-cyan-400 font-medium">{video.channelTitle}</span>
+                    <span className="text-xs text-gray-600">|</span>
+                    <span className="text-xs text-gray-500">{formatDate(video.publishedAt)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                    {decodeHtml(video.description)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* No Results */}
+        {!loading && !error && videos.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-gray-400">No videos found for this category.</p>
+          </div>
+        )}
+
+        {/* Footer Note */}
+        <div className="mt-12 text-center">
+          <p className="text-xs text-gray-600">
+            Videos sourced from YouTube Data API v3. Content is owned by respective creators.
+          </p>
+        </div>
+      </main>
+    </>
+  );
+}
+`;
+
+fs.writeFileSync('src/app/videos/page.tsx', videosPage, 'utf8');
+console.log('Created: src/app/videos/page.tsx');
+
+// 2. Update Navbar to include Videos link
+const navbarPath = 'src/components/layout/Navbar.tsx';
+let navbar = fs.readFileSync(navbarPath, 'utf8');
+
+// Check if Videos link already exists
+if (!navbar.includes('/videos')) {
+  // Find the last nav link and add Videos after it
+  // Look for the whistleblowers/key players link and add after it
+  const patterns = [
+    { find: '/whistleblowers', label: 'Key Players' },
+    { find: '/timeline', label: 'Timeline' },
+    { find: '/legislation', label: 'Legislation' },
+  ];
+
+  let inserted = false;
+  for (const p of patterns) {
+    if (navbar.includes(p.find)) {
+      // Find the closing tag after this link
+      const idx = navbar.indexOf(p.find);
+      // Find the next </a> or </Link> after this
+      const afterIdx = navbar.indexOf('>', navbar.indexOf('>', idx) + 1);
+      const searchAfter = navbar.indexOf(p.label, idx);
+      
+      // Try to find the pattern: href="/whistleblowers">Key Players</
+      // and insert a similar link after the complete element
+      const linkPattern = new RegExp(
+        `(href="${p.find}"[^>]*>[^<]*<[^>]*>)`,
+        'g'
+      );
+      
+      // Simpler approach: just find and add after the nav link text
+      if (navbar.includes(`"${p.find}"`)) {
+        // Find the full link element containing this href
+        // Look for closing </a> or </Link> after the href
+        const hrefIdx = navbar.indexOf(`"${p.find}"`);
+        // Find the next two closing tags (</a> or </Link>)
+        let closeIdx = hrefIdx;
+        let closingTag = '';
+        
+        // Search for </a> or </Link> after href
+        const nextCloseA = navbar.indexOf('</a>', hrefIdx);
+        const nextCloseLink = navbar.indexOf('</Link>', hrefIdx);
+        
+        if (nextCloseA > -1 && (nextCloseLink === -1 || nextCloseA < nextCloseLink)) {
+          closeIdx = nextCloseA + 4;
+          closingTag = '</a>';
+        } else if (nextCloseLink > -1) {
+          closeIdx = nextCloseLink + 7;
+          closingTag = '</Link>';
+        }
+        
+        if (closeIdx > hrefIdx) {
+          // Extract the link element to understand the pattern
+          const beforeClose = navbar.substring(0, closeIdx);
+          const afterClose = navbar.substring(closeIdx);
+          
+          // Create a Videos link in the same style
+          // Detect if using Link or a tags
+          const usesLink = closingTag === '</Link>';
+          const linkStart = navbar.lastIndexOf('<', hrefIdx);
+          const existingLink = navbar.substring(linkStart, closeIdx);
+          
+          // Create new link based on existing pattern
+          let newLink = existingLink
+            .replace(new RegExp(p.find, 'g'), '/videos')
+            .replace(new RegExp(p.label, 'g'), 'Videos');
+          
+          navbar = beforeClose + '\n            ' + newLink + afterClose;
+          inserted = true;
+          console.log('Inserted Videos link after ' + p.label);
+          break;
+        }
+      }
+    }
+  }
+  
+  if (!inserted) {
+    // Fallback: try a simple string replacement approach
+    // Look for common navbar patterns
+    if (navbar.includes('Key Players')) {
+      navbar = navbar.replace(
+        'Key Players</a>',
+        'Key Players</a>\n            <a href="/videos" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors">Videos</a>'
+      );
+      inserted = true;
+      console.log('Inserted Videos link (fallback method)');
+    } else if (navbar.includes('Timeline')) {
+      navbar = navbar.replace(
+        'Timeline</a>',
+        'Timeline</a>\n            <a href="/videos" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors">Videos</a>'
+      );
+      inserted = true;
+      console.log('Inserted Videos link after Timeline (fallback)');
+    }
+  }
+  
+  if (inserted) {
+    fs.writeFileSync(navbarPath, navbar, 'utf8');
+    console.log('Updated: ' + navbarPath);
+  } else {
+    console.log('WARNING: Could not auto-insert Videos link into Navbar. You may need to add it manually.');
+    console.log('Current navbar content around nav links:');
+    const navSection = navbar.substring(
+      Math.max(0, navbar.indexOf('href') - 50),
+      Math.min(navbar.length, navbar.indexOf('href') + 500)
+    );
+    console.log(navSection);
+  }
+} else {
+  console.log('Videos link already exists in Navbar');
+}
+
+console.log('\n=== DONE ===');
+console.log('Files created/updated:');
+console.log('  - src/app/videos/page.tsx (Videos page with YouTube API)');
+console.log('  - src/components/layout/Navbar.tsx (added Videos link)');
+console.log('\nNext steps:');
+console.log('  1. Test locally: npm run dev');
+console.log('  2. Visit: http://localhost:3001/videos');
+console.log('  3. If it works, push to GitHub:');
+console.log('     git add .');
+console.log('     git commit -m "Add YouTube videos page"');
+console.log('     git push');
