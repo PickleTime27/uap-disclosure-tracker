@@ -11,8 +11,6 @@ const navItems = [
   { href: '/legislation', label: 'Legislation', icon: '⊠' },
   { href: '/timeline', label: 'Timeline', icon: '⊡' },
   { href: '/whistleblowers', label: 'Key Players', icon: '⊕' },
-  { href: '/videos', label: 'Videos', icon: '▶' },
-  { href: '/videos', label: 'Videos', icon: '⊕' },
   { href: '/videos', label: 'Videos', icon: '⊕' },
 ];
 
