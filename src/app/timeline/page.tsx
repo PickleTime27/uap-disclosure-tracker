@@ -1,22 +1,33 @@
-'use client';
 import Navbar from '@/components/layout/Navbar';
+import { prisma } from '@/lib/db';
 
-const events = [
-  { date: 'Feb 20, 2026', title: "Trump Directs Pentagon to Release UAP/UFO Files", description: 'President Trump announced directive to release government files on aliens, UAP, and UFOs.', category: 'Executive Action', importance: 'critical', url: 'https://www.nbcnews.com/politics/trump-administration/trump-says-directing-pentagon-release-files-related-ufos-aliens-rcna259833' },
-  { date: 'Feb 14, 2026', title: "Obama Says Aliens Are Real on Podcast", description: 'Former President Obama stated aliens are real, later clarified he meant statistically likely.', category: 'Notable', importance: 'high', url: 'https://www.scientificamerican.com/article/trumps-order-to-release-evidence-for-aliens-obscures-the-scientific-search/' },
-  { date: 'Sep 19, 2025', title: "House Hearing: Restoring Public Trust", description: 'Elizondo, Shellenberger, and Gallaudet testified. Criticized AARO conclusions.', category: 'Hearing', importance: 'high', url: 'https://oversight.house.gov/' },
-  { date: 'Nov 14, 2024', title: 'AARO FY2024 Annual Report Released', description: '757 new cases. 21 merit further analysis. GREMLIN sensor deployed.', category: 'Document', importance: 'high', url: 'https://media.defense.gov/2024/Nov/14/2003583603/-1/-1/0/FY24-CONSOLIDATED-ANNUAL-REPORT-ON-UAP-508.PDF' },
-  { date: '2024-2025', title: 'NARA Begins Receiving UAP Records (RG 615)', description: 'National Archives established Record Group 615 for UAP records from federal agencies.', category: 'Document', importance: 'high', url: 'https://www.archives.gov/research/topics/uaps/rg-615' },
-  { date: 'Jul 26, 2023', title: 'Grusch Testimony Before House Oversight', description: 'David Grusch testified under oath about multi-decade UAP retrieval programs.', category: 'Whistleblower', importance: 'critical', url: 'https://oversight.house.gov/hearing/unidentified-anomalous-phenomena-implications-on-national-security-public-safety-and-government-transparency/' },
-  { date: 'Jul 2023', title: 'Schumer-Rounds UAP Disclosure Act Introduced', description: 'Bipartisan bill to create JFK-style review board. Key provisions later stripped.', category: 'Legislation', importance: 'critical', url: 'https://www.congress.gov/bill/118th-congress/senate-bill/2226' },
-  { date: 'Jun 2023', title: 'David Grusch Goes Public as Whistleblower', description: 'Former NGA/NRO officer alleged US government possesses non-human craft.', category: 'Whistleblower', importance: 'critical', url: 'https://thedebrief.org/intelligence-officials-say-u-s-has-retrieved-non-human-craft/' },
-  { date: 'Apr 2020', title: 'Pentagon Officially Releases UAP Videos', description: 'FLIR1, Gimbal, GoFast videos officially declassified and released.', category: 'Document', importance: 'critical', url: 'https://www.war.gov/News/Releases/Release/Article/2165713/statement-by-the-department-of-defense-on-the-release-of-historical-navy-videos/' },
-  { date: 'Dec 2017', title: 'New York Times UAP Bombshell', description: 'NYT revealed AATIP program and published Navy UAP videos. Launched modern disclosure era.', category: 'Media', importance: 'critical', url: 'https://www.nytimes.com/2017/12/16/us/politics/pentagon-program-ufo-harry-reid.html' },
-];
+const catColors: Record<string, string> = {
+  HEARING: 'bg-blue-500',
+  DOCUMENT_RELEASE: 'bg-emerald-500',
+  LEGISLATION: 'bg-purple-500',
+  EXECUTIVE_ACTION: 'bg-red-500',
+  WHISTLEBLOWER: 'bg-yellow-500',
+  MEDIA: 'bg-pink-500',
+  SCIENTIFIC: 'bg-teal-500',
+  INTERNATIONAL: 'bg-orange-500',
+};
 
-const catColors = { 'Executive Action': 'bg-red-500', 'Hearing': 'bg-blue-500', 'Document': 'bg-emerald-500', 'Legislation': 'bg-purple-500', 'Whistleblower': 'bg-yellow-500', 'Notable': 'bg-orange-500', 'Media': 'bg-pink-500' };
+const catLabels: Record<string, string> = {
+  HEARING: 'Hearing',
+  DOCUMENT_RELEASE: 'Document',
+  LEGISLATION: 'Legislation',
+  EXECUTIVE_ACTION: 'Executive Action',
+  WHISTLEBLOWER: 'Whistleblower',
+  MEDIA: 'Media',
+  SCIENTIFIC: 'Scientific',
+  INTERNATIONAL: 'International',
+};
 
-export default function TimelinePage() {
+export default async function TimelinePage() {
+  const events = await prisma.timelineEvent.findMany({
+    orderBy: { date: 'desc' },
+  });
+
   return (
     <><Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -25,19 +36,19 @@ export default function TimelinePage() {
         <p className="text-sm text-gray-400">Key moments in UAP transparency. Click any event for source coverage.</p>
       </div>
       <div className="flex flex-wrap gap-3 mb-8">
-        {Object.entries(catColors).map(([cat, color]) => <div key={cat} className="flex items-center gap-1.5"><span className={"w-2.5 h-2.5 rounded-full " + color} /><span className="text-xs text-gray-500">{cat}</span></div>)}
+        {Object.entries(catLabels).map(([key, label]) => <div key={key} className="flex items-center gap-1.5"><span className={"w-2.5 h-2.5 rounded-full " + (catColors[key] || 'bg-gray-500')} /><span className="text-xs text-gray-500">{label}</span></div>)}
       </div>
       <div className="relative">
         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-800" />
         <div className="space-y-4">
-          {events.map((e, i) => (
-            <a key={i} href={e.url} target="_blank" rel="noopener noreferrer" className="block relative pl-12 group">
+          {events.map((e) => (
+            <a key={e.id} href={e.sourceUrl || '#'} target="_blank" rel="noopener noreferrer" className="block relative pl-12 group">
               <div className={"absolute left-2.5 top-5 w-3.5 h-3.5 rounded-full border-2 border-gray-900 " + (catColors[e.category] || 'bg-gray-500')} />
-              <div className={"card p-4 hover:border-cyan-500/40 transition-all cursor-pointer border-l-2 " + (e.importance === 'critical' ? 'border-l-red-500' : e.importance === 'high' ? 'border-l-orange-500' : 'border-l-yellow-500')}>
+              <div className={"card p-4 hover:border-cyan-500/40 transition-all cursor-pointer border-l-2 " + (e.importance === 'CRITICAL' ? 'border-l-red-500' : e.importance === 'HIGH' ? 'border-l-orange-500' : 'border-l-yellow-500')}>
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="text-xs font-mono text-gray-500">{e.date}</span>
+                  <span className="text-xs font-mono text-gray-500">{e.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   <span className="text-xs font-mono text-gray-600">&middot;</span>
-                  <span className={"text-xs font-mono " + (e.importance === 'critical' ? 'text-red-400' : 'text-orange-400')}>{e.importance.toUpperCase()}</span>
+                  <span className={"text-xs font-mono " + (e.importance === 'CRITICAL' ? 'text-red-400' : 'text-orange-400')}>{e.importance}</span>
                 </div>
                 <h3 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">{e.title}</h3>
                 <p className="text-xs text-gray-500 mt-1">{e.description}</p>
