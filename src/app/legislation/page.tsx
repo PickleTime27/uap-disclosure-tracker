@@ -22,7 +22,7 @@ export default async function LegislationPage() {
   ]);
 
   return (
-    <><VideoBackground videoId="VUrTsaECggo" />
+    <><VideoBackground videoId="SpeSpA3e56A" />
     <div className="relative" style={{ zIndex: 10 }}>
     <Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
