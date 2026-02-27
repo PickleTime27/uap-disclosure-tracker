@@ -1,5 +1,6 @@
 import Navbar from '@/components/layout/Navbar';
 import HeroBackground from '@/components/HeroBackground';
+import VideoBackground from '@/components/VideoBackground';
 import { prisma } from '@/lib/db';
 
 const colorCycle = [
@@ -42,7 +43,9 @@ export default async function Home() {
   const latestAlert = alerts[0];
 
   return (
-    <><Navbar />
+    <><VideoBackground />
+    <div className="relative" style={{ zIndex: 10 }}>
+    <Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="relative rounded-xl overflow-hidden mb-8 border border-gray-800/50" style={{ minHeight: '400px' }}>
         <HeroBackground />
@@ -114,6 +117,7 @@ export default async function Home() {
           ))}
         </div>
       </div>
-    </main></>
+    </main>
+    </div></>
   );
 }
