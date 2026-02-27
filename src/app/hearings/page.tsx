@@ -1,4 +1,5 @@
 import Navbar from '@/components/layout/Navbar';
+import VideoBackground from '@/components/VideoBackground';
 import { prisma } from '@/lib/db';
 
 export default async function HearingsPage() {
@@ -8,7 +9,9 @@ export default async function HearingsPage() {
   });
 
   return (
-    <><Navbar />
+    <><VideoBackground videoId="SKsLK_Na7iw" />
+    <div className="relative" style={{ zIndex: 10 }}>
+    <Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
         <h1 className="font-display text-2xl font-bold text-white mb-2">Congressional Hearings</h1>
@@ -30,6 +33,7 @@ export default async function HearingsPage() {
           </a>
         ))}
       </div>
-    </main></>
+    </main>
+    </div></>
   );
 }

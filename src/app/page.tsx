@@ -43,7 +43,7 @@ export default async function Home() {
   const latestAlert = alerts[0];
 
   return (
-    <><VideoBackground />
+    <><VideoBackground videoId="bTGRK9a-oHQ" />
     <div className="relative" style={{ zIndex: 10 }}>
     <Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">

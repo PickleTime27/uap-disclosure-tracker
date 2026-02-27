@@ -1,12 +1,18 @@
 'use client';
 
-export default function VideoBackground() {
+interface VideoBackgroundProps {
+  videoId?: string;
+}
+
+export default function VideoBackground({ videoId = 'bTGRK9a-oHQ' }: VideoBackgroundProps) {
+  const src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1&rel=0&disablekb=1&playsinline=1`;
+
   return (
     <>
       {/* YouTube iframe — full viewport, behind everything */}
       <iframe
-        src="https://www.youtube.com/embed/bTGRK9a-oHQ?autoplay=1&mute=1&loop=1&playlist=bTGRK9a-oHQ&controls=0&showinfo=0&modestbranding=1&rel=0&disablekb=1&playsinline=1"
-        title="USS Omaha UAP footage"
+        src={src}
+        title="Background UAP footage"
         allow="autoplay; encrypted-media"
         allowFullScreen
         style={{

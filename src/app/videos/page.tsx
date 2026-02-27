@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import VideoBackground from '@/components/VideoBackground';
 
 interface Video {
   id: string;
@@ -82,6 +83,8 @@ export default function VideosPage() {
 
   return (
     <>
+      <VideoBackground videoId="cdJLaqNEFMM" />
+      <div className="relative" style={{ zIndex: 10 }}>
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
@@ -166,6 +169,7 @@ export default function VideosPage() {
           <p className="text-xs text-gray-600">Videos sourced from YouTube Data API v3. Content is owned by respective creators.</p>
         </div>
       </main>
+      </div>
     </>
   );
 }

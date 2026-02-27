@@ -1,4 +1,5 @@
 import Navbar from '@/components/layout/Navbar';
+import VideoBackground from '@/components/VideoBackground';
 import { prisma } from '@/lib/db';
 
 const statusColorMap: Record<string, string> = {
@@ -21,7 +22,9 @@ export default async function LegislationPage() {
   ]);
 
   return (
-    <><Navbar />
+    <><VideoBackground videoId="VUrTsaECggo" />
+    <div className="relative" style={{ zIndex: 10 }}>
+    <Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
         <h1 className="font-display text-2xl font-bold text-white mb-2">Legislation Tracker</h1>
@@ -52,6 +55,7 @@ export default async function LegislationPage() {
           );
         })}
       </div>
-    </main></>
+    </main>
+    </div></>
   );
 }

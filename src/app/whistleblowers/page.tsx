@@ -1,4 +1,5 @@
 import Navbar from '@/components/layout/Navbar';
+import VideoBackground from '@/components/VideoBackground';
 import { prisma } from '@/lib/db';
 import KeyPlayersList from './KeyPlayersList';
 
@@ -22,13 +23,16 @@ export default async function KeyPlayersPage() {
   const categories = [...new Set(players.map(p => p.category))];
 
   return (
-    <><Navbar />
+    <><VideoBackground videoId="lWLZgnmRDs4" />
+    <div className="relative" style={{ zIndex: 10 }}>
+    <Navbar />
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
         <h1 className="font-display text-2xl font-bold text-white mb-2">Key Players</h1>
         <p className="text-sm text-gray-400">Legislators, whistleblowers, and officials driving UAP disclosure.</p>
       </div>
       <KeyPlayersList players={serialized} categories={categories} />
-    </main></>
+    </main>
+    </div></>
   );
 }

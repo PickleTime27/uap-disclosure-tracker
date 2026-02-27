@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/layout/Navbar';
+import VideoBackground from '@/components/VideoBackground';
 import ReportForm from './ReportForm';
 import type { Sighting } from './SightingsMap';
 
@@ -63,6 +64,8 @@ export default function SightingsPage() {
 
   return (
     <>
+      <VideoBackground videoId="iEK3YC_BKTI" />
+      <div className="relative" style={{ zIndex: 10 }}>
       <Navbar />
       {/* Leaflet CSS */}
       {/* eslint-disable-next-line @next/next/no-css-tags */}
@@ -189,6 +192,7 @@ export default function SightingsPage() {
           </div>
         </div>
       </main>
+      </div>
     </>
   );
 }
