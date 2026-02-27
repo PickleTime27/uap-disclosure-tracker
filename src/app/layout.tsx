@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'UAP Disclosure Tracker',
     description: 'Track congressional hearings, declassified documents, legislation, and live UAP sightings.',
-    images: ['https://uapdisclosure.info/og-image.svg'],
+    images: ['https://uapdisclosure.info/og-image.png'],
   },
 };
 export const viewport: Viewport = {
