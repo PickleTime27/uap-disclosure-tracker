@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/layout/Navbar';
+import ReportForm from './ReportForm';
 import type { Sighting } from './SightingsMap';
 
 // ── Dynamically load map (Leaflet requires window) ─────────────────────
@@ -10,7 +11,7 @@ const SightingsMap = dynamic(() => import('./SightingsMap'), { ssr: false });
 
 // ── Constants ───────────────────────────────────────────────────────────
 const shapes = ['All', 'Orb', 'Triangle', 'Disk', 'Cylinder', 'Fireball', 'Light', 'Sphere', 'Rectangle', 'Cigar', 'Other'];
-const years = ['All', '2020', '2021', '2022', '2023', '2024', '2025'];
+const years = ['All', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
 
 const shapeColors: Record<string, string> = {
   Orb: 'bg-cyan-400',
@@ -32,9 +33,10 @@ export default function SightingsPage() {
   const [stateSearch, setStateSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch sightings data
-  useEffect(() => {
-    fetch('/sightings-data.json')
+  // Fetch sightings from API
+  const fetchSightings = useCallback(() => {
+    setLoading(true);
+    fetch('/api/sightings')
       .then((r) => r.json())
       .then((data: Sighting[]) => {
         setAll(data);
@@ -42,6 +44,10 @@ export default function SightingsPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchSightings();
+  }, [fetchSightings]);
 
   // Apply filters
   const filtered = useMemo(() => {
@@ -52,6 +58,8 @@ export default function SightingsPage() {
       return true;
     });
   }, [all, shapeFilter, yearFilter, stateSearch]);
+
+  const communityCount = useMemo(() => all.filter((s) => s.verified === false).length, [all]);
 
   return (
     <>
@@ -83,11 +91,19 @@ export default function SightingsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="font-display text-2xl font-bold text-white mb-2">UAP Sightings Map</h1>
-          <p className="text-sm text-gray-400">
-            Interactive map of {all.length} reported UAP/UFO sightings across the United States (2020–2025). Filter by shape, year, or location.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-white mb-2">UAP Sightings Map</h1>
+            <p className="text-sm text-gray-400">
+              Interactive map of {all.length} reported UAP/UFO sightings across the United States.
+              {communityCount > 0 && (
+                <span className="ml-1 text-yellow-400/80">
+                  ({communityCount} community-reported)
+                </span>
+              )}
+            </p>
+          </div>
+          <ReportForm onSightingAdded={fetchSightings} />
         </div>
 
         {/* Filters */}

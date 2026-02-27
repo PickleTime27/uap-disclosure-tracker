@@ -173,6 +173,30 @@ model Alert {
 }
 
 // ============================================
+// SIGHTINGS — User-submitted UAP sighting reports
+// ============================================
+model Sighting {
+  id            String   @id @default(cuid())
+  date          DateTime
+  city          String
+  state         String
+  country       String   @default("US")
+  lat           Float
+  lng           Float
+  shape         String
+  duration      String?
+  summary       String   @db.Text
+  reporterName  String?
+  reporterEmail String?
+  verified      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([date])
+  @@index([shape])
+  @@index([state])
+}
+
+// ============================================
 // SCRAPER LOGS — Track data collection runs
 // ============================================
 model ScraperLog {

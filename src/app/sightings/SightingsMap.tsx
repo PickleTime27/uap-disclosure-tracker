@@ -26,7 +26,8 @@ export interface Sighting {
   lng: number;
   shape: string;
   summary: string;
-  duration: string;
+  duration?: string | null;
+  verified?: boolean;
 }
 
 interface SightingsMapProps {
@@ -79,6 +80,14 @@ export default function SightingsMap({ sightings }: SightingsMapProps) {
         day: 'numeric',
       });
 
+      const verifiedBadge = s.verified === false
+        ? '<span style="background:#facc1522;color:#facc15;border:1px solid #facc1544;padding:1px 6px;border-radius:4px;font-size:9px;margin-left:4px">COMMUNITY</span>'
+        : '';
+
+      const durationStr = s.duration
+        ? `<span style="color:#64748b;font-size:10px;padding:2px 0">${s.duration}</span>`
+        : '';
+
       const marker = L.circleMarker([s.lat, s.lng], {
         radius: 6,
         fillColor: color,
@@ -90,11 +99,11 @@ export default function SightingsMap({ sightings }: SightingsMapProps) {
 
       marker.bindPopup(
         `<div style="font-family:ui-monospace,monospace;min-width:200px">
-          <div style="font-weight:700;font-size:13px;color:#e2e8f0;margin-bottom:6px">${s.city}, ${s.state}</div>
+          <div style="font-weight:700;font-size:13px;color:#e2e8f0;margin-bottom:6px">${s.city}, ${s.state}${verifiedBadge}</div>
           <div style="font-size:11px;color:#94a3b8;margin-bottom:4px">${dateStr}</div>
           <div style="display:flex;gap:6px;margin-bottom:8px">
             <span style="background:${color}22;color:${color};border:1px solid ${color}44;padding:1px 6px;border-radius:4px;font-size:10px">${s.shape}</span>
-            <span style="color:#64748b;font-size:10px;padding:2px 0">${s.duration}</span>
+            ${durationStr}
           </div>
           <div style="font-size:11px;color:#cbd5e1;line-height:1.5">${s.summary}</div>
         </div>`,
