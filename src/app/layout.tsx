@@ -1,7 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-
 export const metadata: Metadata = {
   title: 'UAP Disclosure Tracker',
   description: 'Track congressional hearings, declassified documents, FOIA releases, and legislation related to UAP/UFO disclosure.',
@@ -9,17 +8,28 @@ export const metadata: Metadata = {
   keywords: ['UAP', 'UFO', 'disclosure', 'congressional hearings', 'FOIA', 'declassification', 'AARO'],
   openGraph: {
     title: 'UAP Disclosure Tracker',
-    description: 'The disclosure tracker the UAP community has been waiting for.',
+    description: 'Track congressional hearings, declassified documents, legislation, and live UAP sightings on an interactive map.',
     type: 'website',
+    url: 'https://uapdisclosure.info',
+    siteName: 'UAP Disclosure Tracker',
+    images: [{
+      url: 'https://uapdisclosure.info/og-image.svg',
+      width: 1200,
+      height: 630,
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'UAP Disclosure Tracker',
+    description: 'Track congressional hearings, declassified documents, legislation, and live UAP sightings.',
+    images: ['https://uapdisclosure.info/og-image.svg'],
   },
 };
-
 export const viewport: Viewport = {
   themeColor: '#06b6d4',
   width: 'device-width',
   initialScale: 1,
 };
-
 export default function RootLayout({
   children,
 }: {
